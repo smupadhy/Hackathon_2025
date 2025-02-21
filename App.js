@@ -1,5 +1,6 @@
+import React from "react";
 import { useAuth } from "react-oidc-context";
-import VoiceAssistant from "./components/VoiceAssistant";  // NEW LINE added
+import VoiceAssistant from "./VoiceAssistant";  // NEW LINE added
 
 function App() {
   const auth = useAuth();
