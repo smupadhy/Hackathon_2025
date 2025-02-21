@@ -35,8 +35,8 @@ function VoiceAssistant() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <h2>🎤 AI Voice Assistant</h2>
-      <button onClick={startListening}>🎙️ Speak Now</button>
+      <h2>AI Voice Assistant</h2>
+      <button onClick={startListening}> Speak Now</button>
       <p>{text}</p>
     </div>
   );
