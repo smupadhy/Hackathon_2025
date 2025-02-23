@@ -1,0 +1,30 @@
+banking-db-cluster.cluster-cxmi8o0oebpe.us-east-1.rds.amazonaws.com
+
+[CTcwO9wTM~D(WB4OpwP5qw2qRiM
+
+
+
+"C:\Program Files\MySQL\MySQL Server 9.2\bin\mysql.exe" -h banking-db-cluster-instance-1.cxmi8o0oebpe.us-east-1.rds.amazonaws.com -u admin -p < C:/Users/ADMIN/Desktop/AI_Banking_Assistant/run_sql.py
+
+"C:\Program Files\MySQL\MySQL Server 9.2\bin\mysql.exe" -h banking-db-cluster.cluster-cxmi8o0oebpe.us-east-1.rds.amazonaws.com -u admin -p < C:/Users/ADMIN/Desktop/AI_Banking_Assistant/run_sql.py
+
+
+SHOW TABLES;
+
+SELECT * FROM customers;
+
+
+Step 1: Setting Up Your Development Environment
+Step 2: Set Up AWS and Connect to It
+Step 3: Set Up the Banking Database (Backend)
+Step 4: Create an API to Access the Database
+
+
+
+
+Set up Amazon Lex for voice conversations!
+Add AI for financial consultation!
+
+
+py -m uvicorn bank_api:app --reload to startup DB connection in web  http://127.0.0.1:8000/income/1
+py -m http.server 8080 to sratup local webUI  http://localhost:8080/index.html

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Lex Voice Chat</title>
+    <!-- Load AWS SDK -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1487.0.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      #chat-box { width: 400px; height: 300px; border: 1px solid #ccc; padding: 10px; overflow-y: auto; margin-bottom: 10px; }
+      .user-msg { color: blue; }
+      .bot-msg { color: green; }
+      .message { margin: 5px 0; }
+      button { margin: 5px; }
+    </style>
+  </head>
+  <body>
+    <h1>Lex Banking Assistant (Voice Enabled)</h1>
+
+    <div id="chat-box"></div>
+
+    <!-- Controls for voice -->
+    <button onclick="startRecognition()">Start Listening</button>
+    <button onclick="stopRecognition()">Stop Listening</button>
+
+    <script>
+      // AWS and Lex configuration
+      AWS.config.region = "ap-southeast-2"; // change to your region
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: "ap-southeast-2:6d73b47f-0e55-4031-af5c-614ac1cdc4a9", // Replace with your Cognito Identity Pool ID
+      });
+
+      let lexRuntime = null;
+      AWS.config.credentials.get(function(err) {
+        if (err) {
+          console.error("Error retrieving credentials.", err);
+          return;
+        }
+        console.log("Credentials retrieved");
+        lexRuntime = new AWS.LexRuntimeV2();
+      });
+
+      const botId = "LG1S4TZQY3";      // Replace with your Lex Bot ID
+      const botAliasId = "TSTALIASID";  // Replace with your Lex Bot Alias ID
+      const localeId = "en_US";         // Replace with your Lex locale (e.g., en_US)
+      let sessionId = "testSession123"; // Unique session ID per user
+
+      const chatBox = document.getElementById("chat-box");
+
+      // Function to add messages to chat
+      function addMessage(text, className) {
+        let p = document.createElement("p");
+        p.className = "message " + className;
+        p.textContent = text;
+        chatBox.appendChild(p);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      // Send text message to Lex and process the response
+      function sendToLex(text) {
+        if (!lexRuntime) {
+          alert("Lex runtime not initialized yet. Please wait.");
+          return;
+        }
+        addMessage("You: " + text, "user-msg");
+
+        const params = { botId, botAliasId, localeId, sessionId, text };
+
+        lexRuntime.recognizeText(params, function(err, data) {
+          if (err) {
+            console.error(err, err.stack);
+            addMessage("Error: " + err.message, "bot-msg");
+          } else {
+            console.log("Lex response:", data);
+            if (data.messages && data.messages.length > 0) {
+              let botResponse = data.messages[0].content;
+              addMessage("Bot: " + botResponse, "bot-msg");
+              speakText(botResponse);
+            } else {
+              addMessage("Bot: (No response from bot)", "bot-msg");
+              speakText("(No response from bot)");
+            }
+          }
+        });
+      }
+
+      // --- Voice: Speech Recognition (STT) ---
+      let recognition;
+      if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.continuous = true; // Keep listening until manually stopped
+        recognition.interimResults = false;
+
+        recognition.onresult = function(event) {
+          const last = event.results.length - 1;
+          const transcript = event.results[last][0].transcript.trim();
+          console.log("Recognized: ", transcript);
+          sendToLex(transcript);
+        };
+
+        recognition.onerror = function(event) {
+          console.error("Speech recognition error", event.error);
+        };
+      } else {
+        alert("Your browser does not support Speech Recognition API.");
+      }
+
+      function startRecognition() {
+        if (recognition) {
+          recognition.start();
+          addMessage("Listening...", "bot-msg");
+        }
+      }
+
+      function stopRecognition() {
+        if (recognition) {
+          recognition.stop();
+          addMessage("Stopped listening.", "bot-msg");
+        }
+      }
+
+      // --- Voice: Speech Synthesis (TTS) ---
+      function speakText(text) {
+        if ('speechSynthesis' in window) {
+          let utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = "en-US"; // Change if needed
+          window.speechSynthesis.speak(utterance);
+        } else {
+          console.warn("Speech synthesis not supported in this browser.");
+        }
+      }
+    </script>
+  </body>
+</html>
